@@ -73,8 +73,10 @@ public class Playtomic_GameVars : Playtomic_Responder
 			var len = raw.Count;
 			for(var i=0; i<len; i++)
 			{
-				Hashtable item = (Hashtable)raw[i];			
-				response.Data.Add((string)item["Name"], (string)item["Value"]);
+				Hashtable item = (Hashtable)raw[i];	
+				var name = WWW.UnEscapeURL((string)item["name"]);
+				var value = WWW.UnEscapeURL((string)item["value"]);
+				response.Data.Add(name, value);
 			}
 			
 			SetResponse(response, "Load");

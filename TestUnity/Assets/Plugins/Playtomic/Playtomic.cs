@@ -55,6 +55,7 @@ public class Playtomic : MonoBehaviour
 			return;
 			
 		var go = new GameObject("playtomic");
+		GameObject.DontDestroyOnLoad(go);
 			
 		_instance = go.AddComponent("Playtomic") as Playtomic;
 		_instance.gameid = gameid;
