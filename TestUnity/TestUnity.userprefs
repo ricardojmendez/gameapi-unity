@@ -1,6 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Plugins/Playtomic/Playtomic_GameVars.cs">
+    <Files>
+      <File FileName="Assets/Plugins/Playtomic/Playtomic.cs" Line="59" Column="4" />
+      <File FileName="Assets/Plugins/Playtomic/Playtomic_GameVars.cs" Line="79" Column="36" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
