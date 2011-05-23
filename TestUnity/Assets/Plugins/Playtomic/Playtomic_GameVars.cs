@@ -74,8 +74,8 @@ public class Playtomic_GameVars : Playtomic_Responder
 			for(var i=0; i<len; i++)
 			{
 				Hashtable item = (Hashtable)raw[i];	
-				var name = WWW.UnEscapeURL((string)item["name"]);
-				var value = WWW.UnEscapeURL((string)item["value"]);
+				var name = WWW.UnEscapeURL((string)item["Name"]);
+				var value = WWW.UnEscapeURL((string)item["Value"]);
 				response.Data.Add(name, value);
 			}
 			
