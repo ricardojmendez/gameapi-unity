@@ -39,6 +39,111 @@ using System.Text;
 
 public class Playtomic_Leaderboards : Playtomic_Responder
 {
+	public IEnumerator CreatePrivateLeaderboard(string table, bool highest, string permalink)
+	{
+		var postdata = new WWWForm();
+		postdata.AddField("table", table);
+		postdata.AddField("highest", highest ? "y" : "n");
+		postdata.AddField("permalink", permalink);
+		
+		var www = new WWW(Playtomic.APIUrl + "v2/leaderboards/create.aspx?swfid=" + Playtomic.GameId + "&js=y", postdata);
+		yield return www;
+		
+		if (www.error != null)
+		{
+			SetResponse(Playtomic_Response.GeneralError(www.error), "CreatePrivateLeaderboard");
+			yield break;
+		}
+		
+		if (string.IsNullOrEmpty(www.text))
+		{
+			SetResponse(Playtomic_Response.GeneralError(-1), "CreatePrivateLeaderboard");
+			yield break;
+		}
+		
+		var results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
+		var response = new Playtomic_Response();
+		response.Success = (int)(double)results["Status"] == 1;
+		response.ErrorCode = (int)(double)results["ErrorCode"];
+		
+		if(response.Success)
+		{
+			response.Data.Add("TableId", (string)results["tableid"]);
+			response.Data.Add("Name", name);
+			response.Data.Add("Bitly", (string)results["Bitly"]);
+			response.Data.Add("Permalink", (string)results["Permalink"]);
+			response.Data.Add("Highest", highest);
+			response.Data.Add("RealName", (string)results["RealName"]);
+		}
+		
+		SetResponse(response, "CreatePrivateLeaderboard");
+		yield break;
+	}
+	
+	public IEnumerator LoadPrivateLeaderboard(string tableid)
+	{
+		var postdata = new WWWForm();
+		postdata.AddField("tableid", tableid);
+		
+		var www = new WWW(Playtomic.APIUrl + "v2/leaderboards/load.aspx?swfid=" + Playtomic.GameId + "&js=y", postdata);
+		yield return www;
+		
+		if (www.error != null)
+		{
+			SetResponse(Playtomic_Response.GeneralError(www.error), "CreatePrivateLeaderboard");
+			yield break;
+		}
+		
+		if (string.IsNullOrEmpty(www.text))
+		{
+			SetResponse(Playtomic_Response.GeneralError(-1), "CreatePrivateLeaderboard");
+			yield break;
+		}
+		
+		var results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
+		var response = new Playtomic_Response();
+		response.Success = (int)(double)results["Status"] == 1;
+		response.ErrorCode = (int)(double)results["ErrorCode"];
+		
+		if(response.Success)
+		{
+			response.Data.Add("TableId", tableid);
+			response.Data.Add("Bitly", (string)results["Bitly"]);
+			response.Data.Add("Permalink", (string)results["Permalink"]);
+			response.Data.Add("Name", (string)results["Name"]);
+			response.Data.Add("RealName", (string)results["RealName"]);
+			response.Data.Add("Highest", (bool)results["Highest"]);
+		}
+		
+		SetResponse(response, "LoadPrivateLeaderboard");
+		yield break;
+	}
+	
+	public string GetLeaderboardFromUrl()
+	{
+		var url = Playtomic.SourceUrl;
+		
+		if(!url.Contains("?"))
+			return null;
+		
+		if(!url.Contains("leaderboard="))
+			return null;
+		
+			
+		var afterq = url.substring(url.indexOf("leaderboard=") + 12);
+			
+		if(afterq.indexOf("&") > -1)
+			afterq = afterq.substring(0, afterq.indexOf("&"));
+			   
+		if(afterq.indexOf("#") > -1)
+		   afterq = afterq.substring(0, afterq.indexOf("#"));
+		
+		if(afterq.Length == 24)
+			return afterq;
+		
+		return null;
+	}
+	
 	public IEnumerator Save(string table, Playtomic_PlayerScore score, bool highest)
 	{
 		return Save(table, score, highest, false, false);
@@ -58,9 +163,10 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		postdata.AddField("points", score.Points.ToString());
 		postdata.AddField("allowduplicates", allowduplicates ? "y" : "n");
 		postdata.AddField("auth", Hash(Playtomic.SourceUrl + score.Points));
-		postdata.AddField("customfields", score.CustomData.Count.ToString());
+		postdata.AddField("numfields", score.CustomData.Count.ToString());
 		postdata.AddField("fbuserid", string.IsNullOrEmpty(score.FBUserId) ? "" : score.FBUserId);
 		postdata.AddField("fb", facebook ? "y" : "n");
+		postdata.AddField("url", Playtomic.SourceUrl);
 		
 		var n = 0;
 		
@@ -71,7 +177,7 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 			n++;
 		}
 		
-		var www = new WWW(Playtomic.APIUrl + "leaderboards/save.aspx?swfid=" + Playtomic.GameId + "&js=y&url=" + Playtomic.SourceUrl, postdata);
+		var www = new WWW(Playtomic.APIUrl + "v2/leaderboards/save.aspx?swfid=" + Playtomic.GameId + "&js=y", postdata);
 		yield return www;
 		
 		if (www.error != null)
@@ -94,17 +200,139 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		yield break;
 	}
 	
-	public IEnumerator List(string table, bool highest, string mode, int page, int perpage)
+	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal)
 	{
-		return List(table, highest, mode, page, perpage, null);
+		return SaveAndList(table, score, highest, false, false);
 	}
 	
-	public IEnumerator List(string table, bool highest, string mode, int page, int perpage, Dictionary<String, String> customfilters)
-	{		
-		var numfilters = customfilters == null ? 0 : customfilters.Count;
-		var url = Playtomic.APIUrl + "leaderboards/list.aspx?swfid=" + Playtomic.GameId + "&js=y&table=" + WWW.EscapeURL(table) + "&mode=" + mode + "&page=" + page + "&perpage=" + perpage + "&numfilters=" + numfilters;
+	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal, bool allowduplicates)
+	{
+		return SaveAndList(table, score, highest, allowduplicates, false);
+	}
+	
+	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal, bool allowduplicates, bool facebook, Dictionary<String, String> customfilters)
+	{
 		var postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		
+		// common data
+		postdata.AddField("table", table);
+		postdata.AddField("highest", highest ? "y" : "n");
+		postdata.AddField("fb", facebook ? "y" : "n");
+		
+		// save data
+		postdata.AddField("name", score.Name);
+		postdata.AddField("points", score.Points.ToString());
+		postdata.AddField("allowduplicates", allowduplicates ? "y" : "n");
+		postdata.AddField("auth", Hash(Playtomic.SourceUrl + score.Points));
+		postdata.AddField("numfields", score.CustomData.Count.ToString());
+		postdata.AddField("fbuserid", string.IsNullOrEmpty(score.FBUserId) ? "" : score.FBUserId);
+		postdata.AddField("url", Playtomic.SourceUrl);
+		
+		var n = 0;
+		
+		foreach(var key in score.CustomData.Keys)
+		{
+			postdata.AddField("ckey" + n, key);
+			postdata.AddField("cdata" + n, score.CustomData[key]);
+			n++;
+		}
+		
+		// list data
+		var numfilters = customfilters == null ? 0 : customfilters.Count;
+		
+		postdata.AddField("global", isglobal ? "y" : "n");
+		postdata.AddField("perpage", perpage);
+		postdata.AddField("mode", mode);
+		postdata.AddField("numfilters", numfilters);
+		
+		if(numfilters > 0)
+		{
+			var fieldnumber = 0;
+		    
+		    foreach(var key in customfilters.Keys)
+		    {
+				postdata.AddField("lkey" + fieldnumber, key);
+				postdata.AddField("ldata" + fieldnumber, customfilters[key]);
+				fieldnumber++;
+		    }
+		}
+	
+		WWW www = new WWW(Playtomic.APIUrl + "v2/leaderboards/saveandlist.aspx?swfid=" + Playtomic.GameId + "&js=y", postdata);
+		yield return www;
+		
+		if (www.error != null)
+		{
+			SetResponse(Playtomic_Response.GeneralError(www.error), "SaveAndList");
+			yield break;
+		}
+		
+		if (string.IsNullOrEmpty(www.text))
+		{
+			SetResponse(Playtomic_Response.GeneralError(-1), "SaveAndList");
+			yield break;
+		}
+				
+		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
+		var response = new Playtomic_Response();
+		response.Success = (int)(double)results["Status"] == 1;
+		response.ErrorCode = (int)(double)results["ErrorCode"];
+		response.Scores = new List<Playtomic_PlayerScore>();
+		response.NumItems = 0;
+    
+		if(response.Success)
+		{
+			var data = (Hashtable)results["Data"];
+			var scores = (ArrayList)data["Scores"];
+			var len = scores.Count;
+			
+			response.NumItems = (int)(double)data["NumScores"];
+			
+			for(var i=0; i<len; i++)
+			{
+				Hashtable item = (Hashtable)scores[i];	
+				
+				var score = new Playtomic_PlayerScore();
+				score.Name = WWW.UnEscapeURL((string)item["Name"]);
+				score.Points = (int)(double)item["Points"];
+				score.SDate = DateTime.Parse((string)item["SDate"]);
+				score.RDate = WWW.UnEscapeURL((string)item["RDate"]);
+				score.Rank = (long)(double)item["Rank"];
+				
+				if(item.ContainsKey("CustomData"))
+				{
+					Hashtable customdata = (Hashtable)item["CustomData"];
+	
+					foreach(var key in customdata.Keys)
+						score.CustomData.Add((string)key, WWW.UnEscapeURL((string)customdata[key]));
+				}
+				
+				response.Scores.Add(score);
+			}
+		}
+		
+		SetResponse(response, "SaveAndList");
+	}
+	
+	public IEnumerator List(string table, bool highest, string mode, int page, int perpage, bool facebook)
+	{
+		return List(table, highest, mode, page, perpage, facebook, null, null);
+	}
+		
+	public IEnumerator List(string table, bool highest, string mode, int page, int perpage, bool facebook, Dictionary<String, String> customfilters)
+	{	
+		return List(table, highest, mode, page, perpage, facebook, customfilters, null);
+	}
+	
+	
+	public IEnumerator List(string table, bool highest, string mode, int page, int perpage, bool facebook, Dictionary<String, String> customfilters, string[] friendslist)
+	{
+		var numfilters = customfilters == null ? 0 : customfilters.Count;
+		var postdata = new WWWForm();
+		postdata.AddField("table", table);
+		postdata.AddField("mode", mode);
+		postdata.AddField("page", page);
+		postdata.AddField("perpage", perpage);
+		postdata.AddField("numfilters", numfilters);
 		
 		if(numfilters > 0)
 		{
@@ -116,6 +344,22 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 				postdata.AddField("cdata" + fieldnumber, customfilters[key]);
 				fieldnumber++;
 		    }
+		}
+		
+		string url;
+		
+		if(facebook)
+		{
+			if(friendslist != null && friendslist.Length > 0)
+			{
+				postdata.AddField("friendslist", string.Join(",", friendslist));
+			}
+			
+			url = Playtomic.APIUrl + "v2/leaderboards/listfb.aspx?swfid=" + Playtomic.GameId + "&js=y";
+		}
+		else
+		{
+			url = Playtomic.APIUrl + "v2/leaderboards/list.aspx?swfid=" + Playtomic.GameId + "&js=y";
 		}
 		
 		WWW www = new WWW(url);
@@ -132,9 +376,7 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 			SetResponse(Playtomic_Response.GeneralError(-1), "List");
 			yield break;
 		}
-		
-		Debug.Log(www.text);
-		
+				
 		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
 		var response = new Playtomic_Response();
 		response.Success = (int)(double)results["Status"] == 1;
@@ -159,6 +401,10 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 				score.Points = (int)(double)item["Points"];
 				score.SDate = DateTime.Parse((string)item["SDate"]);
 				score.RDate = WWW.UnEscapeURL((string)item["RDate"]);
+				score.Rank = (long)(double)item["Rank"];
+				
+				if(item.Contains("FBUserId"))
+					score.FBUserId = (string)item["FBUserId"];
 				
 				if(item.ContainsKey("CustomData"))
 				{
@@ -174,102 +420,7 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		
 		SetResponse(response, "List");
 	}
-	
-	public IEnumerator ListFB(string table, bool highest, string mode, int page, int perpage)
-	{
-		return ListFB(table, highest, mode, page, perpage, null, null);
-	}
-	
-	public IEnumerator ListFB(string table, bool highest, string mode, int page, int perpage, Dictionary<String, String> customfilters)
-	{
-		return ListFB(table, highest, mode, page, perpage, null, customfilters);
-	}
-	
-	public IEnumerator ListFB(string table, bool highest, string mode, int page, int perpage, string[] friendslist)
-	{
-		return ListFB(table, highest, mode, page, perpage, friendslist, null);
-	}
-	
-	public IEnumerator ListFB(string table, bool highest, string mode, int page, int perpage, string[] friendslist, Dictionary<String, String> customfilters)
-	{
-		var numfilters = customfilters == null ? 0 : customfilters.Count;
-		var url = Playtomic.APIUrl + "leaderboards/listfb.aspx?swfid=" + Playtomic.GameId + "&js=y&table=" + WWW.EscapeURL(table) + "&mode=" + mode + "&page=" + page + "&perpage=" + perpage + "&numfilters=" + numfilters;
-	    var postdata = new WWWForm();
-		postdata.AddField("unity", 1);
 		
-		if(numfilters > 0)
-		{
-			var fieldnumber = 0;
-		    
-		    foreach(var key in customfilters.Keys)
-		    {
-				postdata.AddField("ckey" + fieldnumber, key);
-				postdata.AddField("cdata" + fieldnumber, customfilters[key]);
-				fieldnumber++;
-		    }
-		}
-		
-		if(friendslist != null)
-		{
-			postdata.AddField("friendslist", string.Join(",", friendslist));
-		}
-		
-		WWW www = new WWW(url);
-		yield return www;
-		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "ListFB");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "ListFB");
-			yield break;
-		}
-		
-		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		response.Scores = new List<Playtomic_PlayerScore>();
-		response.NumItems = 0;
-    
-		if(response.Success)
-		{
-			var data = (Hashtable)results["Data"];
-			var scores = (ArrayList)data["Scores"];
-			var len = scores.Count;
-			
-			response.NumItems = (int)(double)data["NumScores"];
-			
-			for(var i=0; i<len; i++)
-			{
-				Hashtable item = (Hashtable)scores[i];	
-				
-				var score = new Playtomic_PlayerScore();
-				score.Name = WWW.UnEscapeURL((string)item["Name"]);
-				score.Points = (int)(double)item["Points"];
-				score.SDate = DateTime.Parse((string)item["SDate"]);
-				score.RDate = WWW.UnEscapeURL((string)item["RDate"]);
-				score.FBUserId = (string)item["FBUserId"];
-				
-				if(item.ContainsKey("CustomData"))
-				{
-					Hashtable customdata = (Hashtable)item["CustomData"];
-	
-					foreach(var key in customdata.Keys)
-						score.CustomData.Add((string)key, WWW.UnEscapeURL((string)customdata[key]));
-				}
-				
-				response.Scores.Add(score);
-			}
-		}
-		
-		SetResponse(response, "ListFB");
-	}
-	
 	private static string Hash(string input)
 	{
         MD5 md5 = MD5.Create();
