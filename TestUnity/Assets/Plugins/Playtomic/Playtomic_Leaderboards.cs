@@ -69,10 +69,10 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		if(response.Success)
 		{
 			response.Data.Add("TableId", (string)results["tableid"]);
-			response.Data.Add("Name", name);
+			response.Data.Add("Name", table);
 			response.Data.Add("Bitly", (string)results["Bitly"]);
 			response.Data.Add("Permalink", (string)results["Permalink"]);
-			response.Data.Add("Highest", highest);
+			response.Data.Add("Highest", highest ? "true" : "false");
 			response.Data.Add("RealName", (string)results["RealName"]);
 		}
 		
@@ -112,7 +112,7 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 			response.Data.Add("Permalink", (string)results["Permalink"]);
 			response.Data.Add("Name", (string)results["Name"]);
 			response.Data.Add("RealName", (string)results["RealName"]);
-			response.Data.Add("Highest", (bool)results["Highest"]);
+			response.Data.Add("Highest", (bool)results["Highest"] ? "true" : "false");
 		}
 		
 		SetResponse(response, "LoadPrivateLeaderboard");
@@ -129,14 +129,13 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		if(!url.Contains("leaderboard="))
 			return null;
 		
+		var afterq = url.Substring(url.IndexOf("leaderboard=") + 12);
 			
-		var afterq = url.substring(url.indexOf("leaderboard=") + 12);
-			
-		if(afterq.indexOf("&") > -1)
-			afterq = afterq.substring(0, afterq.indexOf("&"));
+		if(afterq.IndexOf("&") > -1)
+			afterq = afterq.Substring(0, afterq.IndexOf("&"));
 			   
-		if(afterq.indexOf("#") > -1)
-		   afterq = afterq.substring(0, afterq.indexOf("#"));
+		if(afterq.IndexOf("#") > -1)
+		   afterq = afterq.Substring(0, afterq.IndexOf("#"));
 		
 		if(afterq.Length == 24)
 			return afterq;
@@ -202,12 +201,12 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 	
 	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal)
 	{
-		return SaveAndList(table, score, highest, false, false);
+		return SaveAndList(table, score, highest, mode, perpage, isglobal, false, false, null);
 	}
 	
 	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal, bool allowduplicates)
 	{
-		return SaveAndList(table, score, highest, allowduplicates, false);
+		return SaveAndList(table, score, highest, mode, perpage, isglobal, allowduplicates, false, null);
 	}
 	
 	public IEnumerator SaveAndList(string table, Playtomic_PlayerScore score, bool highest, string mode, int perpage, bool isglobal, bool allowduplicates, bool facebook, Dictionary<String, String> customfilters)
@@ -291,22 +290,22 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 			{
 				Hashtable item = (Hashtable)scores[i];	
 				
-				var score = new Playtomic_PlayerScore();
-				score.Name = WWW.UnEscapeURL((string)item["Name"]);
-				score.Points = (int)(double)item["Points"];
-				score.SDate = DateTime.Parse((string)item["SDate"]);
-				score.RDate = WWW.UnEscapeURL((string)item["RDate"]);
-				score.Rank = (long)(double)item["Rank"];
+				var sscore = new Playtomic_PlayerScore();
+				sscore.Name = WWW.UnEscapeURL((string)item["Name"]);
+				sscore.Points = (int)(double)item["Points"];
+				sscore.SDate = DateTime.Parse((string)item["SDate"]);
+				sscore.RDate = WWW.UnEscapeURL((string)item["RDate"]);
+				sscore.Rank = (long)(double)item["Rank"];
 				
 				if(item.ContainsKey("CustomData"))
 				{
 					Hashtable customdata = (Hashtable)item["CustomData"];
 	
 					foreach(var key in customdata.Keys)
-						score.CustomData.Add((string)key, WWW.UnEscapeURL((string)customdata[key]));
+						sscore.CustomData.Add((string)key, WWW.UnEscapeURL((string)customdata[key]));
 				}
 				
-				response.Scores.Add(score);
+				response.Scores.Add(sscore);
 			}
 		}
 		

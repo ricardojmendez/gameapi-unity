@@ -213,7 +213,7 @@
 	
 	function ListScores():IEnumerator
 	{
-		yield StartCoroutine(Playtomic.Leaderboards.List("highscores", true, "alltime", 1, 20));
+		yield StartCoroutine(Playtomic.Leaderboards.List("highscores", true, "alltime", 1, 20, false));
 		var response = Playtomic.Leaderboards.GetResponse("List");
 		
 		if(response.Success)
