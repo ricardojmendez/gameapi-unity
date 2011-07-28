@@ -39,88 +39,84 @@ public class Playtomic_PlayerLevels : Playtomic_Responder
 {	
 	public Playtomic_PlayerLevels () { }
 	
+	private static string SECTION;
+	private static string SAVE;
+	private static string LIST;
+	private static string LOAD;
+	private static string RATE;
+	
+	internal static void Initialise(string apikey)
+	{
+		SECTION = Playtomic_Encode.MD5("playerlevels-" + apikey);
+		RATE = Playtomic_Encode.MD5("playerlevels-rate-" + apikey);
+		LIST = Playtomic_Encode.MD5("playerlevels-list-" + apikey);
+		SAVE = Playtomic_Encode.MD5("playerlevels-save-" + apikey);
+		LOAD = Playtomic_Encode.MD5("playerlevels-load-" + apikey);
+	}
+	
 	public IEnumerator Save(Playtomic_PlayerLevel level)
 	{
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("data", level.Data);
-		postdata.AddField("playerid", level.PlayerId);
-		postdata.AddField("playername", level.PlayerName);
-		postdata.AddField("playersource", Playtomic.SourceUrl);
-		postdata.AddField("name", level.Name);
-		postdata.AddField("nothumb", "y");
-		postdata.AddField("customfields", level.CustomData.Count);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("data", level.Data);
+		postdata.Add("playerid", level.PlayerId);
+		postdata.Add("playername", level.PlayerName);
+		postdata.Add("playersource", Playtomic.SourceUrl);
+		postdata.Add("name", level.Name);
+		postdata.Add("nothumb", "y");
+		postdata.Add("customfields", level.CustomData.Count.ToString());
 		
 		var n = 0;
 		
 		foreach(var key in level.CustomData.Keys)
 		{
-			postdata.AddField("ckey" + n, key);
-			postdata.AddField("cdata" + n, level.CustomData[key]);
+			postdata.Add("ckey" + n, key);
+			postdata.Add("cdata" + n, level.CustomData[key]);
 			n++;
 		}
 		
-		WWW www = new WWW(Playtomic.APIUrl + "/playerlevels/save.aspx?swfid=" + Playtomic.GameId + "&js=true", postdata);
+		string url;
+		WWWForm post;
+		
+		Playtomic_Request.Prepare(SECTION, SAVE, postdata, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "Save");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "Save");
-			yield break;
-		}
-		
-		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		
+		var response = Playtomic_Request.Process(www);
+	
 		if (response.Success)
 		{
-			Hashtable data = (Hashtable)(results["Data"]);
-			response.Data.Add("LevelId", (string)data["LevelId"]);
-			response.Data.Add("Name", (string)data["Name"]);
+			var data = (Hashtable)response.JSON;
+
+			foreach(string key in data.Keys)
+			{
+				var name = WWW.UnEscapeURL(key);
+				var value = WWW.UnEscapeURL((string)data[key]);
+				response.Data.Add(name, value);
+			}
 		}
 		
 		SetResponse(response, "Save");
-		yield break;
 	}
 	
 	public IEnumerator Load(string levelid)
 	{
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("levelid", levelid);
 		
-		WWW www = new WWW(Playtomic.APIUrl + "/playerlevels/load.aspx?swfid=" + Playtomic.GameId + "&js=y&levelid=" + levelid);
+		string url;
+		WWWForm post;
+		
+		Playtomic_Request.Prepare(SECTION, LOAD, postdata, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "Load");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "Load");
-			yield break;
-		}
-		
-		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		response.Levels = new List<Playtomic_PlayerLevel>();
-		response.NumItems = 0;
-		
-		if(response.Success)
-		{
-			var item = (Hashtable)results["Data"];
+		var response = Playtomic_Request.Process(www);
 	
+		if (response.Success)
+		{
+			var item = response.JSON;
 			var level = new Playtomic_PlayerLevel();
 			level.LevelId = (string)item["LevelId"];
 			level.PlayerSource = (string)item["PlayerSource"];
@@ -149,8 +145,6 @@ public class Playtomic_PlayerLevels : Playtomic_Responder
 		}
 		
 		SetResponse(response, "Load");
-		
-		yield break;
 	}
 
 	public IEnumerator List(string mode, int page, int perpage)
@@ -165,40 +159,46 @@ public class Playtomic_PlayerLevels : Playtomic_Responder
 		
 	public IEnumerator List(string mode, int page, int perpage, bool includedata, bool includethumbs, DateTime datemin, DateTime datemax)
 	{
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("mode", mode);
+		postdata.Add("page", page.ToString());
+		postdata.Add("perpage", perpage.ToString());
+		postdata.Add("thumbs", includethumbs ? "y" : "n");
+		postdata.Add("data", includedata ? "y" : "n");
+		postdata.Add("datemin", datemin.ToString("MM/dd/yyyy"));
+		postdata.Add("datemax", datemax.ToString("MM/dd/yyyy"));
 		
-		WWW www = new WWW(Playtomic.APIUrl + "/playerlevels/list.aspx?swfid=" + Playtomic.GameId + "&js=y&mode=" + mode + "&page=" + page + "&perpage=" + perpage + 
-		                  "&data=" + (includedata ? "y" : "n") + "&thumbs=" + (includethumbs ? "y" : "n") + 
-		                  "&datemin=" + (datemin != DateTime.MinValue ? datemin.ToString("MM/dd/yyyy") : "") + "&datemax=" + (datemax != DateTime.MaxValue ? datemax.ToString("MM/dd/yyyy") : ""));
+		
+		
+		/*var n = 0;
+		
+		foreach(var key in level.CustomData.Keys)
+		{
+			postdata.Add("ckey" + n, key);
+			postdata.Add("cdata" + n, level.CustomData[key]);
+			n++;
+		}*/
+		
+		postdata.Add("filters", "0");
+		 
+		string url;
+		WWWForm post;
+		
+		Playtomic_Request.Prepare(SECTION, LIST, postdata, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
+		var response = Playtomic_Request.Process(www);
+	
+		if (response.Success)
 		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "List");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "List");
-			yield break;
-		}
-		
-		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		response.Levels = new List<Playtomic_PlayerLevel>();
-		response.NumItems = 0;
-		
-		if(response.Success)
-		{
-			var data = (Hashtable)results["Data"];
+			var data = (Hashtable)response.JSON;
 			var levels = (ArrayList)data["Levels"];
 			var len = levels.Count;
 			
 			response.NumItems = (int)(double)data["NumLevels"];
+			response.Levels = new List<Playtomic_PlayerLevel>();
 			
 			for(var i=0; i<len; i++)
 			{
@@ -232,8 +232,6 @@ public class Playtomic_PlayerLevels : Playtomic_Responder
 		}
 		
 		SetResponse(response, "List");
-		
-		yield break;
 	}
 	
 	public IEnumerator Rate(string levelid, int rating)
@@ -243,31 +241,21 @@ public class Playtomic_PlayerLevels : Playtomic_Responder
 			SetResponse(Playtomic_Response.Error(401), "Rate");
 			yield break;
 		}
+
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("levelid", levelid);
+		postdata.Add("rating", rating.ToString());
 		
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		string url;
+		WWWForm post;
 		
-		WWW www = new WWW(Playtomic.APIUrl + "/playerlevels/rate.aspx?swfid=" + Playtomic.GameId + "&js=true&levelid=" + levelid + "&rating=" + rating, postdata);
+		Playtomic_Request.Prepare(SECTION, RATE, postdata, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "Rate");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "Rate");
-			yield break;
-		}
-		
-		Hashtable results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
+		var response = Playtomic_Request.Process(www);
 		SetResponse(response, "Rate");
-		yield break;
 	}
 	
 	public void LogStart(string levelid)

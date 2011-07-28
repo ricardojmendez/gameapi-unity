@@ -37,37 +37,46 @@ using System.Collections.Generic;
 
 public class Playtomic_Data : Playtomic_Responder
 {
-	public Playtomic_Data() { }
+	private static string SECTION;
+	private static string VIEWS;
+	private static string PLAYS;
+	private static string PLAYTIME;
+	private static string CUSTOMMETRIC;
+	private static string LEVELCOUNTERMETRIC;
+	private static string LEVELAVERAGEMETRIC;
+	private static string LEVELRANGEDMETRIC;
+	
+	internal static void Initialise(string apikey)
+	{
+		SECTION = Playtomic_Encode.MD5("data-" + apikey);
+		VIEWS = Playtomic_Encode.MD5("data-views-" + apikey);
+		PLAYS = Playtomic_Encode.MD5("data-plays-" + apikey);
+		PLAYTIME = Playtomic_Encode.MD5("data-playtime-" + apikey);
+		CUSTOMMETRIC = Playtomic_Encode.MD5("data-custommetric-" + apikey);
+		LEVELCOUNTERMETRIC = Playtomic_Encode.MD5("data-levelcountermetric-" + apikey);
+		LEVELAVERAGEMETRIC = Playtomic_Encode.MD5("data-levelaveragemetric-" + apikey);
+		LEVELRANGEDMETRIC = Playtomic_Encode.MD5("data-levelrangedmetric-" + apikey);
+	}
 	
 	// general metrics
-	public IEnumerator Views()
+	public IEnumerator Views() 
 	{
 		return Views(0, 0, 0);
 	}
-	
-	public IEnumerator Views(int month, int year)
-	{
-		return Views(0, month, year);
-	}
-	
+		
 	public IEnumerator Views(int day, int month, int year)
 	{
-		return General("Views", day, month, year);
+		return General(VIEWS, "Views", day, month, year);
 	}
 	
 	public IEnumerator Plays()
 	{
 		return Plays(0, 0, 0);
 	}
-	
-	public IEnumerator Plays(int month, int year)
-	{
-		return Plays(0, month, year);
-	}
-	
+		
 	public IEnumerator Plays(int day, int month, int year)
 	{
-		return General("Plays", day, month, year);
+		return General(PLAYS, "Plays", day, month, year);
 	}
 	
 	public IEnumerator PlayTime()
@@ -75,19 +84,19 @@ public class Playtomic_Data : Playtomic_Responder
 		return PlayTime(0, 0, 0);
 	}
 	
-	public IEnumerator PlayTime(int month, int year)
-	{
-		return PlayTime(0, month, year);
-	}
-	
 	public IEnumerator PlayTime(int day, int month, int year)
 	{
-		return General("PlayTime", day, month, year);
+		return General(PLAYTIME, "PlayTime", day, month, year);
 	}
 	
-	private IEnumerator General(string type, int day, int month, int year)
+	private IEnumerator General(string action, string type, int day, int month, int year)
 	{
-		return GetData(type, Playtomic.APIUrl + "/data/" + type + ".aspx?swfid=" + Playtomic.GameId + "&js=y&day=" + day + "&month=" + month + "&year=" + year);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("day", day.ToString());
+		postdata.Add("month", month.ToString());
+		postdata.Add("year", year.ToString());
+		
+		return GetData(type, action, postdata);
 	}
 	
 	// custom metrics
@@ -95,15 +104,16 @@ public class Playtomic_Data : Playtomic_Responder
 	{
 		return CustomMetric(metric, 0, 0, 0);
 	}
-	
-	public IEnumerator CustomMetric(string metric, int month, int year)
-	{
-		return CustomMetric(metric, 0, month, year);
-	}
-	
+		
 	public IEnumerator CustomMetric(string metric, int day, int month, int year)
 	{
-		return GetData("CustomMetric", Playtomic.APIUrl + "/data/custommetric.aspx?swfid=" + Playtomic.GameId + "&metric=" + metric + "&js=y&day=" + day + "&month=" + month + "&year=" + year);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("day", day.ToString());
+		postdata.Add("month", month.ToString());
+		postdata.Add("year", year.ToString());
+		postdata.Add("metric", metric);
+		
+		return GetData("CustomMetric", CUSTOMMETRIC, postdata);
 	}
 	
 	// level metrics
@@ -116,17 +126,7 @@ public class Playtomic_Data : Playtomic_Responder
 	{
 		return LevelCounter(metric, level.ToString(), 0, 0, 0);
 	}
-	
-	public IEnumerator LevelCounter(string metric, string level, int month, int year)
-	{
-		return LevelCounter(metric, level, 0, month, year);
-	}
-	
-	public IEnumerator LevelCounter(string metric, int level, int month, int year)
-	{
-		return LevelCounter(metric, level.ToString(), 0, month, year);
-	}
-	
+		
 	public IEnumerator LevelCounter(string metric, int level, int day, int month, int year)
 	{
 		return LevelCounter(metric, level.ToString(), day, month, year);
@@ -134,7 +134,7 @@ public class Playtomic_Data : Playtomic_Responder
 	
 	public IEnumerator LevelCounter(string metric, string level, int day, int month, int year)
 	{
-		return LevelMetric("Counter", metric, level, day, month, year);
+		return LevelMetric("Counter", LEVELCOUNTERMETRIC, metric, level, day, month, year);
 	}
 	
 	public IEnumerator LevelAverage(string metric, string level)
@@ -146,17 +146,7 @@ public class Playtomic_Data : Playtomic_Responder
 	{
 		return LevelAverage(metric, level.ToString(), 0, 0, 0);
 	}
-	
-	public IEnumerator LevelAverage(string metric, string level, int month, int year)
-	{
-		return LevelAverage(metric, level, 0, month, year);
-	}
-	
-	public IEnumerator LevelAverage(string metric, int level, int month, int year)
-	{
-		return LevelAverage(metric, level.ToString(), 0, month, year);
-	}
-	
+		
 	public IEnumerator LevelAverage(string metric, int level, int day, int month, int year)
 	{
 		return LevelAverage(metric, level.ToString(), day, month, year);
@@ -164,7 +154,7 @@ public class Playtomic_Data : Playtomic_Responder
 	
 	public IEnumerator LevelAverage(string metric, string level, int day, int month, int year)
 	{
-		return LevelMetric("Average", metric, level, day, month, year);
+		return LevelMetric("Average", LEVELAVERAGEMETRIC, metric, level, day, month, year);
 	}
 		
 	public IEnumerator LevelRanged(string metric, string level)
@@ -177,16 +167,6 @@ public class Playtomic_Data : Playtomic_Responder
 		return LevelRanged(metric, level.ToString(), 0, 0, 0);
 	}
 	
-	public IEnumerator LevelRanged(string metric, string level, int month, int year)
-	{
-		return LevelRanged(metric, level, 0, month, year);
-	}
-	
-	public IEnumerator LevelRanged(string metric, int level, int month, int year)
-	{
-		return LevelRanged(metric, level.ToString(), 0, month, year);
-	}
-	
 	public IEnumerator LevelRanged(string metric, int level, int day, int month, int year)
 	{
 		return LevelRanged(metric, level.ToString(), day, month, year);
@@ -194,49 +174,47 @@ public class Playtomic_Data : Playtomic_Responder
 	
 	public IEnumerator LevelRanged(string metric, string level, int day, int month, int year)
 	{
-		return LevelMetric("Ranged", metric, level, day, month, year);
+		return LevelMetric("Ranged", LEVELRANGEDMETRIC, metric, level, day, month, year);
 	}
 	
-	private IEnumerator LevelMetric(string type, string metric, string level, int day, int month, int year)
+	private IEnumerator LevelMetric(string type, string action, string metric, string level, int day, int month, int year)
 	{
-		return GetData("Level" + type, Playtomic.APIUrl + "/data/levelmetric" + type + ".aspx?swfid=" + Playtomic.GameId + "&metric=" + metric + "&level=" + level + "&js=y&day=" + day + "&month=" + month + "&year=" + year);
-	}
-	
-	private IEnumerator GetData(string identifier, string url)
-	{
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		var postdata = new Dictionary<String, String>();
+		postdata.Add("day", day.ToString());
+		postdata.Add("month", month.ToString());
+		postdata.Add("year", year.ToString());
+		postdata.Add("metric", metric);
+		postdata.Add("level", level);
 		
-		WWW www = new WWW(url, postdata);
+		return GetData(type, action, postdata);
+	}
+	
+	private IEnumerator GetData(string type, string action, Dictionary<String, String> postdata)
+	{
+		string url;
+		WWWForm post;
+		
+		Playtomic_Request.Prepare(SECTION, action, postdata, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), identifier);
-			yield break;
-		}
-
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), identifier);
-			yield break;
-		}
+		Debug.Log(www.text);
 		
-		var results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		
+		var response = Playtomic_Request.Process(www);
+	
 		if (response.Success)
 		{
-			var data = (Hashtable)(results["Data"]);
-			
+			var data = (Hashtable)response.JSON;
+
 			foreach(string key in data.Keys)
-				response.Data.Add(key, (string)data[key]);
+			{
+				var name = WWW.UnEscapeURL(key);
+				var value = WWW.UnEscapeURL((string)data[key]);
+				response.Data.Add(name, value);
+			}
 		}
 		
-		SetResponse(response, identifier);
-		yield break;
+		SetResponse(response, type);
 	}
 }
