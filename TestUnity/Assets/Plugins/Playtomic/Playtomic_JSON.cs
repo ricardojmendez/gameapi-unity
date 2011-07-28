@@ -4,17 +4,18 @@
 //  before check it out:
 //  http://playtomic.com/
 //
+//  Created by ben at the above domain on 2/25/11.
+//  Copyright 2011 Playtomic LLC. All rights reserved.
+//
 //  Documentation is available at:
 //  http://playtomic.com/api/unity
 //
-// -------------------------------------------------------------------------
-//
 // PLEASE NOTE:
-// Playtomic_JSON.cs has its own licensing and copyright.  It is subject to 
-// the MIT license: you are free to use it in any way you like, but it must 
-// keep its license.
+// You may modify this SDK if you wish but be kind to our servers.  Be
+// careful about modifying the analytics stuff as it may give you 
+// borked reports.
 //
-// http://techblog.procurios.nl/k/618/news/view/14605/14863/How-do-I-write-my-own-parser-for-JSON.html
+// If you make any awesome improvements feel free to let us know!
 //
 // -------------------------------------------------------------------------
 // THIS SOFTWARE IS PROVIDED BY PLAYTOMIC, LLC "AS IS" AND ANY

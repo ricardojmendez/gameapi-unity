@@ -41,39 +41,47 @@ public class Playtomic_GameVars : Playtomic_Responder
 {
 	public Playtomic_GameVars()	{ }
 	
-	private static string SECTION;
-	private static string LOAD;
-	
-	internal static void Initialise(string apikey)
-	{
-		SECTION = Playtomic_Encode.MD5("gamevars-" + apikey);
-		LOAD = Playtomic_Encode.MD5("gamevars-load-" + apikey);
-	}
-	
 	public IEnumerator Load()
 	{
-		string url;
-		WWWForm post;
+		var postdata = new WWWForm();
+		postdata.AddField("unity", 1);
 		
-		Playtomic_Request.Prepare(SECTION, LOAD, null, out url, out post);
-		
-		WWW www = new WWW(url, post);
+		var www = new WWW(Playtomic.APIUrl + "/gamevars/load.aspx?swfid=" + Playtomic.GameId + "&js=true", postdata);
 		yield return www;
 		
-		var response = Playtomic_Request.Process(www);
-	
-		if (response.Success)
+		if (www.error != null)
 		{
-			var data = (Hashtable)response.JSON;
+			SetResponse(Playtomic_Response.GeneralError(www.error), "Load");
+			yield break;
+		}
 
-			foreach(string key in data.Keys)
-			{
-				var name = WWW.UnEscapeURL(key);
-				var value = WWW.UnEscapeURL((string)data[key]);
-				response.Data.Add(name, value);
-			}
+		if (string.IsNullOrEmpty(www.text))
+		{
+			SetResponse(Playtomic_Response.GeneralError(-1), "Load");
+			yield break;
 		}
 		
-		SetResponse(response, "Load");
+		var results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
+		
+		var response = new Playtomic_Response();
+		response.Success = (int)(double)results["Status"] == 1;
+		response.ErrorCode = (int)(double)results["ErrorCode"];
+		
+		if (response.Success)
+		{
+			var raw = (ArrayList)results["Data"];
+			var len = raw.Count;
+			for(var i=0; i<len; i++)
+			{
+				Hashtable item = (Hashtable)raw[i];	
+				var name = WWW.UnEscapeURL((string)item["Name"]);
+				var value = WWW.UnEscapeURL((string)item["Value"]);
+				response.Data.Add(name, value);
+			}
+			
+			SetResponse(response, "Load");
+		}
+		
+		yield break;
 	}
 }
