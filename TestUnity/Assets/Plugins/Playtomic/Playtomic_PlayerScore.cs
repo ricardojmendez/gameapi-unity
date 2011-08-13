@@ -46,6 +46,7 @@ public class Playtomic_PlayerScore
 	public string RDate;
 	public long Rank;
 	public Dictionary<string, string> CustomData = new Dictionary<string, string>();
+	public bool SubmittedOrBest = false;
 
 	public Playtomic_PlayerScore() 
 	{ 

@@ -39,28 +39,77 @@ public class PlaytomicTest : MonoBehaviour
 	void Start () 
 	{
 		Debug.Log("Start");
-		Playtomic.Initialise(1339, "e24ff1548e204607");
+		Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
 		Playtomic.Log.View();
 		
 		// geoip lookup
-		StartCoroutine(LoadGeoIP());
+		//StartCoroutine(LoadGeoIP());
 		
 		// gamevars lookup
-		StartCoroutine(LoadGameVars());
+		//Debug.Log("Loading gamevars");
+		//StartCoroutine(LoadGameVars());
 		
 		// data lookup
-		StartCoroutine(LoadData());
+		//StartCoroutine(LoadData());
 		
 		// player levels
-		StartCoroutine(ListLevels());
-		StartCoroutine(LoadLevel());
-		StartCoroutine(RateLevel());
-		StartCoroutine(SaveLevel());
+		//StartCoroutine(ListLevels());
+		//StartCoroutine(LoadLevel());
+		//StartCoroutine(RateLevel());
+		//StartCoroutine(SaveLevel());
 		
 		// leaderboards
-		StartCoroutine(SaveScore());
-		StartCoroutine(ListScores());
+		//StartCoroutine(SaveScore());
+		//StartCoroutine(ListScores());
+		
+		// parse
+		StartCoroutine(SaveParseObject());
+		StartCoroutine(FindParseObject());
 	}
+	
+	// Parse
+	IEnumerator SaveParseObject()
+	{
+		Debug.Log("Saving Parse Object");
+		var po = new PFObject();
+		po.ClassName = "unity";
+		po.Data.Add("param", "value");
+		
+		yield return StartCoroutine(Playtomic.Parse.Save(po));
+		var response = Playtomic.Parse.GetResponse("Save");
+		
+		if(response.Success)
+		{
+			Debug.Log("Object saved: " + response.PObject.ObjectId);
+		}
+		else
+		{
+			Debug.Log("Object failed to save because of " + response.ErrorCode + ": " + response.ErrorDescription);
+		}
+	}
+	
+	IEnumerator FindParseObject()
+	{
+		Debug.Log("Finding Parse Object");
+		var pq = new PFQuery();
+		pq.ClassName = "unity";
+		
+		yield return StartCoroutine(Playtomic.Parse.Find(pq));
+		var response = Playtomic.Parse.GetResponse("Find");
+		
+		if(response.Success)
+		{
+			Debug.Log("Objects found: " + response.PObjects.Count);
+			
+			for(var i=0; i<response.PObjects.Count; i++)
+				Debug.Log(response.PObjects[i].ObjectId);
+		}
+		else
+		{
+			Debug.Log("Object failed to find because of " + response.ErrorCode + ": " + response.ErrorDescription);
+		}
+	}
+	
 	
 	// Loading the GameVars
 	IEnumerator LoadGameVars()
@@ -84,6 +133,8 @@ public class PlaytomicTest : MonoBehaviour
 		{
 			Debug.Log("GameVars failed because of " + response.ErrorCode + ": " + response.ErrorDescription);
 		}
+		
+		yield return 0;
 	}
 	
 	// Performing a GeoIP lookup

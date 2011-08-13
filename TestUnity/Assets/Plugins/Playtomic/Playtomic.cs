@@ -45,11 +45,23 @@ public class Playtomic : MonoBehaviour
 	private Playtomic_GeoIP geoip;
 	private Playtomic_Link link;
 	private Playtomic_GameVars gamevars;
+	private Playtomic_Parse parse;
 	
 	private static Playtomic _instance = null;
 	
-	
-	public static void Initialise(long gameid, string gameguid)
+	/// <summary>
+	/// Initialises the API.  You must do this before anything else.  Get your credentials from the Playtomic dashboard.
+	/// </summary>
+	/// <param name="gameid">
+	/// A <see cref="System.Int64"/>
+	/// </param>
+	/// <param name="gameguid">
+	/// A <see cref="System.String"/>
+	/// </param>
+	/// <param name="apikey">
+	/// A <see cref="System.String"/>
+	/// </param>
+	public static void Initialise(long gameid, string gameguid, string apikey)
 	{
 		if(_instance != null)
 			return;
@@ -60,7 +72,7 @@ public class Playtomic : MonoBehaviour
 		_instance = go.AddComponent("Playtomic") as Playtomic;
 		_instance.gameid = gameid;
 		_instance.gameguid = gameguid;
-		_instance.sourceUrl = Application.absoluteURL;
+		_instance.sourceUrl = string.IsNullOrEmpty(Application.absoluteURL) ? "http://localhost/" : Application.absoluteURL;
 		_instance.log = new Playtomic_Log();
 		_instance.data = new Playtomic_Data();
 		_instance.leaderboards = new Playtomic_Leaderboards();
@@ -68,6 +80,15 @@ public class Playtomic : MonoBehaviour
 		_instance.geoip = new Playtomic_GeoIP();
 		_instance.link = new Playtomic_Link();
 		_instance.gamevars = new Playtomic_GameVars();
+		_instance.parse = new Playtomic_Parse();
+		
+		Playtomic_Request.Initialise();
+		Playtomic_Data.Initialise(apikey);
+		Playtomic_GameVars.Initialise(apikey);
+		Playtomic_Leaderboards.Initialise(apikey);
+		Playtomic_GeoIP.Initialise(apikey);
+		Playtomic_PlayerLevels.Initialise(apikey);
+		Playtomic_Parse.Initialise(apikey);
 	}
 	
 	public static long GameId
@@ -83,11 +104,6 @@ public class Playtomic : MonoBehaviour
 	public static string SourceUrl
 	{
 		get { return _instance.sourceUrl; }
-	}
-	
-	public static string APIUrl
-	{
-		get { return "http://g" + _instance.gameguid + ".api.playtomic.com/"; }
 	}
 	
 	public static Playtomic API
@@ -129,6 +145,9 @@ public class Playtomic : MonoBehaviour
 	{
 		get { return _instance.gamevars; }
 	}
+	
+	public static Playtomic_Parse Parse
+	{
+		get { return _instance.parse; }
+	}
 }
-
-

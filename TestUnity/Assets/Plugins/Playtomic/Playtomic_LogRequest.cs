@@ -41,7 +41,6 @@ public class Playtomic_LogRequest
 	private static List<Playtomic_LogRequest> Pool = new List<Playtomic_LogRequest>();
 	
 	private string Data = "";
-	private string BaseUrl;
 	public bool Ready = false;
 
 	public static Playtomic_LogRequest Create()
@@ -59,14 +58,9 @@ public class Playtomic_LogRequest
 		
 		request.Data = "";
 		request.Ready = false;
-		
 		return request;
 	}
 	
-	public Playtomic_LogRequest()
-	{
-		BaseUrl = Playtomic.APIUrl + "/tracker/q.aspx?swfid=" + Playtomic.GameId;
-	}
 	
 	public void MassQueue(List<string> data)
 	{
@@ -115,12 +109,8 @@ public class Playtomic_LogRequest
 	
 	private IEnumerator SendData()
 	{ 
-		string url = BaseUrl + "&q=" + Data + "&url=" + Playtomic.SourceUrl + "&" + UnityEngine.Random.Range(0, int.MaxValue) + "z";
-		
-		WWW www = new WWW(url);
-    	yield return www;
-		
+		Playtomic_Request.SendStatistics("/tracker/q.aspx?q=" + Data + "&url=" + Playtomic.SourceUrl);
 		Pool.Add(this);
-        yield break;
+		yield break;
 	}
 }

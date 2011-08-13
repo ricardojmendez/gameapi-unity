@@ -35,27 +35,28 @@
 	function Start () 
 	{
 		Debug.Log("Start (JS)");
-		Playtomic.Initialise(1339, "e24ff1548e204607");
+		Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
         Playtomic.Log.View();
                     
         // geoip lookup
-        StartCoroutine(LoadGeoIP());
+        //StartCoroutine(LoadGeoIP());
         
         // gamevars lookup
-        StartCoroutine(LoadGameVars());
+        //StartCoroutine(LoadGameVars());
         
         // data lookup
-        StartCoroutine(LoadData());
+        //StartCoroutine(LoadData());
         
         // player levels
-        StartCoroutine(ListLevels());
-        StartCoroutine(LoadLevel());
-        StartCoroutine(RateLevel());
-        StartCoroutine(SaveLevel());
+        //StartCoroutine(ListLevels());
+        //StartCoroutine(LoadLevel());
+        //StartCoroutine(RateLevel());
+        //StartCoroutine(SaveLevel());
         
         // leaderboards
-        StartCoroutine(SaveScore());
-        StartCoroutine(ListScores());
+        //StartCoroutine(SaveScore());
+        //StartCoroutine(ListScores());
+        StartCoroutine(SaveAndList());
 	}
 	
 	// Loading the GameVars
@@ -68,7 +69,7 @@
 		{
 			Debug.Log("GameVars are loaded!");
 			
-			for(var key in response.Data)
+			for(var key in response.Data.Keys)
 			{
 				Debug.Log("GameVar " + key + " = " + response.Data[key]);
 			}
@@ -199,7 +200,7 @@
 		score.Points = 1000000;
 		
 		yield StartCoroutine(Playtomic.Leaderboards.Save("highscores", score, true, true, false));
-		var response = Playtomic.PlayerLevels.GetResponse("Save");
+		var response = Playtomic.Leaderboards.GetResponse("Save");
 		
 		if(response.Success)
 		{
@@ -226,5 +227,27 @@
 		else
 		{
 			Debug.Log("Score list failed to load because of " + response.ErrorCode + ": " + response.ErrorDescription);
+		}
+	}
+	
+	function SaveAndList():IEnumerator
+	{
+		var score = new Playtomic_PlayerScore();
+		score.Name = "Ben";
+		score.Points = 1000010;
+		
+		yield StartCoroutine(Playtomic.Leaderboards.SaveAndList("highscores", score, true, "alltime", 10, true));
+		var response = Playtomic.Leaderboards.GetResponse("SaveAndList");
+		
+		if(response.Success)
+		{
+			Debug.Log("Score saved! " + response.ErrorMessage);
+			
+			for(var i=0; i<response.Scores.Count; i++)
+				Debug.Log(response.Scores[i].Name + ": " + response.Scores[i].Points + " (best? " + response.Scores[i].SubmittedOrBest + ")");
+		}
+		else
+		{
+			Debug.Log("Score failed to save because of " + response.ErrorCode + ": " + response.ErrorDescription);
 		}
 	}

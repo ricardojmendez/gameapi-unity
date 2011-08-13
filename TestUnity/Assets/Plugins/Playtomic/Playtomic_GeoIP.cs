@@ -41,40 +41,39 @@ public class Playtomic_GeoIP : Playtomic_Responder
 {
 	public Playtomic_GeoIP() { }
 	
+	private static string SECTION;
+	private static string LOOKUP;
+	
+	internal static void Initialise(string apikey)
+	{
+		SECTION = Playtomic_Encode.MD5("geoip-" + apikey);
+		LOOKUP = Playtomic_Encode.MD5("geoip-lookup-" + apikey);
+	}
+	
 	public IEnumerator Lookup()
 	{
-		WWWForm postdata = new WWWForm();
-		postdata.AddField("unity", 1);
+		string url;
+		WWWForm post;
 		
-		WWW www = new WWW(Playtomic.APIUrl + "/geoip/lookup.aspx?swfid=" + Playtomic.GameId + "&js=true", postdata);
+		Playtomic_Request.Prepare(SECTION, LOOKUP, null, out url, out post);
+		
+		WWW www = new WWW(url, post);
 		yield return www;
 		
-		if (www.error != null)
-		{
-			SetResponse(Playtomic_Response.GeneralError(www.error), "Lookup");
-			yield break;
-		}
-		
-		if (string.IsNullOrEmpty(www.text))
-		{
-			SetResponse(Playtomic_Response.GeneralError(-1), "Lookup");
-		}
-		
-		var results = (Hashtable)Playtomic_JSON.JsonDecode(www.text);
-		
-		var response = new Playtomic_Response();
-		response.Success = (int)(double)results["Status"] == 1;
-		response.ErrorCode = (int)(double)results["ErrorCode"];
-		
+		var response = Playtomic_Request.Process(www);
+	
 		if (response.Success)
 		{
-			Hashtable data = (Hashtable)results["Data"];
-			response.Data.Add("Code", (string)data["Code"]);
-			response.Data.Add("Name", (string)data["Name"]);
+			var data = (Hashtable)response.JSON;
+
+			foreach(string key in data.Keys)
+			{
+				var name = WWW.UnEscapeURL(key);
+				var value = WWW.UnEscapeURL((string)data[key]);
+				response.Data.Add(name, value);
+			}
 		}
 		
 		SetResponse(response, "Lookup");
-		
-		yield break;
 	}
 }
