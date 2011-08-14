@@ -56,7 +56,7 @@
         // leaderboards
         //StartCoroutine(SaveScore());
         //StartCoroutine(ListScores());
-        StartCoroutine(SaveAndList());
+        //StartCoroutine(SaveAndList());
 	}
 	
 	// Loading the GameVars

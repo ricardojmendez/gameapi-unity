@@ -19,14 +19,19 @@ internal class Playtomic_Request
 	
 	public static IEnumerator SendStatistics(string url)
 	{
+		//Debug.Log("Request created");
 		WWWForm post = new WWWForm();
 		post.AddField("x", "x");
 
 		var r = new System.Random();
-		var turl = URLStub + url + r.Next(1000000) + "Z";
+		var turl = URLStub + url + "&" + r.Next(1000000) + "Z";
+		
+		//Debug.Log("Sending data to " + turl);
 		
 		WWW www = new WWW(turl, post);
 		yield return www;
+		
+		//Debug.Log(www.text);
 	}
 	
 	public static void Prepare(string section, string action, Dictionary<String, String> postdata, out string url, out WWWForm post)

@@ -88,6 +88,7 @@ public class Playtomic_LogRequest
 
 	public void Queue(string data)
 	{
+		//Debug.Log("Adding event " + data);
 		if(Failed > 3)
 			return;
 		
@@ -96,21 +97,17 @@ public class Playtomic_LogRequest
 		
 		Data += data;
 
-		if(Data.Length > 300)
+		if(Data.Length > 300 || data.StartsWith("v/") || data.StartsWith("t/"))
 		{
+			//Debug.Log("Ready");
 			Ready = true;
 		}
 	}
 
 	public void Send()
 	{
-		Playtomic.API.StartCoroutine(SendData());
-	}
-	
-	private IEnumerator SendData()
-	{ 
-		Playtomic_Request.SendStatistics("/tracker/q.aspx?q=" + Data + "&url=" + Playtomic.SourceUrl);
+		//Debug.Log("Sending (logrequest)");
+		Playtomic.API.StartCoroutine(Playtomic_Request.SendStatistics("/tracker/q.aspx?q=" + Data + "&url=" + Playtomic.SourceUrl));
 		Pool.Add(this);
-		yield break;
 	}
 }
