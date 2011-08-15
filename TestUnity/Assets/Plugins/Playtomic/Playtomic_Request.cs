@@ -17,14 +17,14 @@ internal class Playtomic_Request
 		URL = URLStub + "v3/api.aspx?" + URLTail;
 	}
 	
-	public static IEnumerator SendStatistics(string url)
+	public static IEnumerator SendStatistics(string data)
 	{
 		//Debug.Log("Request created");
 		WWWForm post = new WWWForm();
 		post.AddField("x", "x");
 
 		var r = new System.Random();
-		var turl = URLStub + url + "&" + r.Next(1000000) + "Z";
+		var turl = URLStub + "tracker/q.aspx?q=" + data + "&swfid=" + Playtomic.GameId + "&url=" + Escape(Playtomic.SourceUrl) + "&" + r.Next(1000000) + "Z";
 		
 		//Debug.Log("Sending data to " + turl);
 		

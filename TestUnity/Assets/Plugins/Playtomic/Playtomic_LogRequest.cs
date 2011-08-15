@@ -107,7 +107,7 @@ public class Playtomic_LogRequest
 	public void Send()
 	{
 		//Debug.Log("Sending (logrequest)");
-		Playtomic.API.StartCoroutine(Playtomic_Request.SendStatistics("/tracker/q.aspx?q=" + Data + "&url=" + Playtomic.SourceUrl));
+		Playtomic.API.StartCoroutine(Playtomic_Request.SendStatistics(Data));
 		Pool.Add(this);
 	}
 }
