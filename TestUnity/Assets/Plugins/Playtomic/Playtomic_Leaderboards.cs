@@ -160,7 +160,7 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		postdata.Add("points", score.Points.ToString());
 		postdata.Add("allowduplicates", allowduplicates ? "y" : "n");
 		postdata.Add("auth", Playtomic_Encode.MD5(Playtomic.SourceUrl + score.Points));
-		postdata.Add("numfields", score.CustomData.Count.ToString());
+		postdata.Add("customfields", score.CustomData.Count.ToString());
 		postdata.Add("fbuserid", string.IsNullOrEmpty(score.FBUserId) ? "" : score.FBUserId);
 		postdata.Add("fb", facebook ? "y" : "n");
 		postdata.Add("url", Playtomic.SourceUrl);

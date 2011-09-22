@@ -50,8 +50,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Plugins\Playtomic\PFObject.cs" />
+     <Compile Include="Assets\Plugins\Playtomic\PFPointer.cs" />
+     <Compile Include="Assets\Plugins\Playtomic\PFQuery.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Data.cs" />
+     <Compile Include="Assets\Plugins\Playtomic\Playtomic_Encode.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_GameVars.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_GeoIP.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_JSON.cs" />
@@ -59,9 +63,11 @@
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Link.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Log.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_LogRequest.cs" />
+     <Compile Include="Assets\Plugins\Playtomic\Playtomic_Parse.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_PlayerLevel.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_PlayerLevels.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_PlayerScore.cs" />
+     <Compile Include="Assets\Plugins\Playtomic\Playtomic_Request.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Responder.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Response.cs" />
      <None Include="Assets\PlaytomicJSTest.js" />
