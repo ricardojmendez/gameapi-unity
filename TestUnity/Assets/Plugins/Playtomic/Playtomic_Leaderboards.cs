@@ -291,6 +291,11 @@ public class Playtomic_Leaderboards : Playtomic_Responder
 		SetResponse(response, "SaveAndList");
 	}
 	
+	public IEnumerator List(string table, bool highest, string mode, int page, int perpage)
+	{
+		return List(table, highest, mode, page, perpage, false, null, null);
+	}
+	
 	public IEnumerator List(string table, bool highest, string mode, int page, int perpage, bool facebook)
 	{
 		return List(table, highest, mode, page, perpage, facebook, null, null);

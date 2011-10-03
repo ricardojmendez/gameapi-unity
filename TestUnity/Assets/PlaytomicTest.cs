@@ -39,8 +39,14 @@ public class PlaytomicTest : MonoBehaviour
 	void Start () 
 	{
 		Debug.Log("Start");
-		Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
+		//Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
+		//Playtomic.Log.View();
+		
+		// tony's test
+		Playtomic.Initialise( 4385, "90d90eb814004737", "8d37fe66b3b246ea877b325b2d24b2" );
 		Playtomic.Log.View();
+		Playtomic.Log.Play();
+		// ------
 		
 		// geoip lookup
 		//StartCoroutine(LoadGeoIP());
@@ -246,7 +252,7 @@ public class PlaytomicTest : MonoBehaviour
 	}
 	
 	// leaderboards
-	IEnumerator SaveScore()
+	/*IEnumerator SaveScore()
 	{
 		var score = new Playtomic_PlayerScore();
 		score.Name = "Ben";
@@ -269,6 +275,44 @@ public class PlaytomicTest : MonoBehaviour
 	{
 		yield return StartCoroutine(Playtomic.Leaderboards.List("highscores", true, "alltime", 1, 20, false));
 		var response = Playtomic.Leaderboards.GetResponse("List");
+		
+		if(response.Success)
+		{
+			Debug.Log("Scores listed successfully: " + response.NumItems + " in total, " + response.Scores.Count + " returned");
+			
+			for(var i=0; i<response.Scores.Count; i++)
+				Debug.Log(response.Scores[i].Name + ": " + response.Scores[i].Points);
+		}
+		else
+		{
+			Debug.Log("Score list failed to load because of " + response.ErrorCode + ": " + response.ErrorDescription);
+		}
+	}*/
+	
+	// tony's test
+	IEnumerator SaveScore()
+	{
+		var score = new Playtomic_PlayerScore();
+		score.Name = "TonyP";
+		score.Points = 1000000;
+		
+		yield return StartCoroutine(Playtomic.Leaderboards.Save("highscores", score, true));
+		var response = Playtomic.PlayerLevels.GetResponse("Save");
+		
+		if( response.Success )
+		{
+			Debug.Log( "Score saved!" );
+		}
+		else
+		{
+			Debug.Log( "Score failed to save because of " + response.ErrorCode + ": " + response.ErrorDescription );
+		}
+	}
+	
+	public IEnumerator ListScores()
+	{
+		yield return StartCoroutine(Playtomic.Leaderboards.List("highscores", true, "alltime", 1, 20, false));
+		var response = Playtomic.Leaderboards.GetResponse( "List" );
 		
 		if(response.Success)
 		{
