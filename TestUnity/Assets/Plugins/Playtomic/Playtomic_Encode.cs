@@ -1,12 +1,14 @@
 using System;
 using System.Text;
-using System.Security.Cryptography;
 
 internal class Playtomic_Encode
 {
+	/*
+	 *  Using new because micro mscorlib doesn't support static Create
+	 * */
 	public static string MD5(string input)
 	{
-        var md5 = System.Security.Cryptography.MD5.Create();
+        var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
         var data = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
 
         var sb = new StringBuilder();
