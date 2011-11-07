@@ -3,8 +3,8 @@
 	"publisher_package_id": 3248,
 	"title": "Playtomic",
 	"description": "Free, real time analytics for casual games using Unity3D, HTML5, iOS and Flash.\n\nWith Playtomic you can track general player data, custom metrics, level metrics, heatmaps, as well as leverage leaderboards, user created levels and content, and store game configuration in our servers where it can be updated at any time.\n\nIt's free, super easy to set up and we're always open to feedback and suggestions on how to make things even better for our Unity developers!",
-	"changes": "Fixed issue with Leaderboards.Save.",
-	"version_name": "1.4",
+	"changes": "Fixed MD5 issue using api with micro & mscorlib.",
+	"version_name": "1.7",
 	"category": 3,
 	"recommended_features": [],
 	"required_features": []
