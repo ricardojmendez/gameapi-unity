@@ -64,6 +64,8 @@
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Request.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Responder.cs" />
      <Compile Include="Assets\Plugins\Playtomic\Playtomic_Response.cs" />
+     <None Include="Assets\Plugins\Playtomic\LICENSE.txt" />
+     <None Include="Assets\Plugins\Playtomic\README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

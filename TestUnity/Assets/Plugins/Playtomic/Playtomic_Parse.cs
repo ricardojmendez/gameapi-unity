@@ -38,7 +38,7 @@ public class Playtomic_Parse : Playtomic_Responder
 			var data = (Hashtable)response.JSON;
 			pobject.ObjectId = (string)data["id"];
 			pobject.CreatedAt = DateTime.Parse((string)data["created"]);
-			pobject.UpdatedAt = DateTime.Parse((string)data["updated"]);
+			pobject.UpdatedAt = DateTime.Parse((string)data["created"]);
 			response.PObject = pobject;
 		}
 		
@@ -92,19 +92,7 @@ public class Playtomic_Parse : Playtomic_Responder
 			{
 				po.Data.Add((string)key, (string)fields[key]);
 			}
-			
-			var pointers = (Hashtable)data["pointers"];
-			
-			foreach(var key in pointers.Keys)
-			{
-				var pdata = (ArrayList)pointers[key];
-				var pchild = new PFObject();
-				pchild.ObjectId = (string)pdata[0];
-				pchild.ClassName = (string)pdata[1];
-				
-				po.Pointers.Add(new PFPointer((string)key, pchild));
-			}
-			
+						
 			response.PObject = po;
 		}
 		
@@ -121,13 +109,6 @@ public class Playtomic_Parse : Playtomic_Responder
 		
 		foreach(var key in pquery.WhereData.Keys)
 			postdata.Add("data" + key, pquery.WhereData[key]);
-
-		for(var i=pquery.WherePointers.Count-1; i>-1; i--)
-		{
-			postdata["pointer" + i + "fieldname"] = pquery.WherePointers[i].FieldName;
-			postdata["pointer" + i + "classname"] = pquery.WherePointers[i].PObject.ClassName;
-			postdata["pointer" + i + "id"] = pquery.WherePointers[i].PObject.ObjectId;
-		}
 
 		string url;
 		WWWForm post;
@@ -159,19 +140,7 @@ public class Playtomic_Parse : Playtomic_Responder
 				{
 					po.Data.Add((string)key, (string)fields[key]);
 				}
-				
-				var pointers = (Hashtable)data["pointers"];
-				
-				foreach(var key in pointers.Keys)
-				{
-					var pdata = (ArrayList)pointers[key];
-					var pchild = new PFObject();
-					pchild.ObjectId = (string)pdata[0];
-					pchild.ClassName = (string)pdata[1];
-					
-					po.Pointers.Add(new PFPointer((string)key, pchild));
-				}
-				
+								
 				response.PObjects.Add(po);
 			}
 		}
@@ -192,14 +161,7 @@ public class Playtomic_Parse : Playtomic_Responder
 		
 		foreach(var key in pobject.Data.Keys)
 			postobject.Add("data" + key, pobject.Data[key]);
-			
-		for(var i=pobject.Pointers.Count-1; i>-1; i--)
-		{
-			postobject.Add("pointer" + i + "fieldname", pobject.Pointers[i].FieldName);
-			postobject.Add("pointer" + i + "classname", pobject.Pointers[i].PObject.ClassName);
-			postobject.Add("pointer" + i + "id", pobject.Pointers[i].PObject.ObjectId);
-		}
-		
+					
 		return postobject;
 	}
 }

@@ -39,14 +39,13 @@ public class PlaytomicTest : MonoBehaviour
 	void Start () 
 	{
 		Debug.Log("Start");
-		//Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
-		//Playtomic.Log.View();
-		
+
 		// tony's test
-		Playtomic.Initialise( 4546, "b5c09f8ee7944b2a", "98e37d2263df46fe860eb2737753c6" );
+		Playtomic.Initialise( 4277, "0c00e714e083408f", "60574a8152ec49ceb1cc61e90441ab" );
+
 		Playtomic.Log.View();
 		Playtomic.Log.Play();
-		return;
+
 		// ------
 		
 		// geoip lookup
