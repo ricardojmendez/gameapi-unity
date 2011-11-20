@@ -38,7 +38,7 @@
 		//Playtomic.Initialise(3653, "39d29b4caee44d51", "c1001cea356a4b1fac5b4b2e9d7001");
 		
 		// codingjar's test
-		Playtomic.Initialise(3939, "3968ba39624744f9", "86f197d61c7943768bba095fbf129e");
+		Playtomic.Initialize(3939, "3968ba39624744f9", "86f197d61c7943768bba095fbf129e");
 		Playtomic.Log.View();
                     
         // geoip lookup

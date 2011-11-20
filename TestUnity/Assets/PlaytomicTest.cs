@@ -41,7 +41,7 @@ public class PlaytomicTest : MonoBehaviour
 		Debug.Log("Start");
 
 		// tony's test
-		Playtomic.Initialise( 4277, "0c00e714e083408f", "60574a8152ec49ceb1cc61e90441ab" );
+		Playtomic.Initialize( 4277, "0c00e714e083408f", "60574a8152ec49ceb1cc61e90441ab" );
 
 		Playtomic.Log.View();
 		Playtomic.Log.Play();

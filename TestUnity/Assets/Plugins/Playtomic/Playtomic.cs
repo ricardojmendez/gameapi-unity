@@ -50,7 +50,7 @@ public class Playtomic : MonoBehaviour
 	private static Playtomic _instance = null;
 	
 	/// <summary>
-	/// Initialises the API.  You must do this before anything else.  Get your credentials from the Playtomic dashboard.
+	/// Initializes the API.  You must do this before anything else.  Get your credentials from the Playtomic dashboard.
 	/// </summary>
 	/// <param name="gameid">
 	/// A <see cref="System.Int64"/>
@@ -61,7 +61,7 @@ public class Playtomic : MonoBehaviour
 	/// <param name="apikey">
 	/// A <see cref="System.String"/>
 	/// </param>
-	public static void Initialise(long gameid, string gameguid, string apikey)
+	public static void Initialize(long gameid, string gameguid, string apikey)
 	{
 		if(_instance != null)
 			return;
