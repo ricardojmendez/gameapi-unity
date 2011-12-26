@@ -40,9 +40,10 @@ public class Playtomic_LogRequest
 	private static int Failed = 0;
 	private static List<Playtomic_LogRequest> Pool = new List<Playtomic_LogRequest>();
 	
-	private string Data = "";
 	public bool Ready = false;
-
+	
+	public string Data { get; private set; }
+	
 	public static Playtomic_LogRequest Create()
 	{
 		Playtomic_LogRequest request = null;
@@ -95,6 +96,8 @@ public class Playtomic_LogRequest
 		if(Data.Length > 0)
 			Data += "~";
 		
+		Debug.Log("Queueing "+Data);
+		
 		Data += data;
 
 		if(Data.Length > 300 || data.StartsWith("v/") || data.StartsWith("t/"))
@@ -103,11 +106,17 @@ public class Playtomic_LogRequest
 			Ready = true;
 		}
 	}
-
-	public void Send()
+	
+	/// <summary>
+	/// Send the current request.
+	/// </summary>
+	/// <param name='errorHandler'>
+	/// Error handler that, if not null, will be called in case there is an error sending the request
+	/// </param>
+	public void Send(RequestErrorHandler errorHandler = null)
 	{
 		//Debug.Log("Sending (logrequest)");
-		Playtomic.API.StartCoroutine(Playtomic_Request.SendStatistics(Data));
+		Playtomic.API.StartCoroutine(Playtomic_Request.SendStatistics(Data, errorHandler));
 		Pool.Add(this);
 	}
 }

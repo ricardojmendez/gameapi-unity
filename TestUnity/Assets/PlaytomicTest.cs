@@ -45,6 +45,7 @@ public class PlaytomicTest : MonoBehaviour
 
 		Playtomic.Log.View();
 		Playtomic.Log.Play();
+		Playtomic.Log.CacheOnError = false;
 
 		// ------
 		
@@ -324,6 +325,14 @@ public class PlaytomicTest : MonoBehaviour
 		else
 		{
 			Debug.Log("Score list failed to load because of " + response.ErrorCode + ": " + response.ErrorDescription);
+		}
+	}
+	
+	void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.M))
+		{
+			Playtomic.Log.LevelCounterMetric("TestKeypress", Application.loadedLevelName);
 		}
 	}
 }

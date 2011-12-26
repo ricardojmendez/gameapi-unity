@@ -89,6 +89,8 @@ public class Playtomic : MonoBehaviour
 		Playtomic_GeoIP.Initialise(apikey);
 		Playtomic_PlayerLevels.Initialise(apikey);
 		Playtomic_Parse.Initialise(apikey);
+		
+		_instance.log.LoadRequest();
 	}
 	
 	public static long GameId
@@ -150,4 +152,20 @@ public class Playtomic : MonoBehaviour
 	{
 		get { return _instance.parse; }
 	}
+	
+	#region Unity method handlers
+	void OnApplicationQuit()
+	{
+		/* 
+		 * Playtomic caches requests until we have at least 300 characters,
+		 * so it is possible that if the player quits the game before we get
+		 * to that count the queued requests will be lost.
+		 * 
+		 * We can't however just force send, since it happens inside a 
+		 * coroutine, and the behaviour will likely be destroyed before it
+		 * gets to execute.  Save the pending items, along with the queue.
+		 */
+		Log.SaveRequest();
+	}
+	#endregion
 }

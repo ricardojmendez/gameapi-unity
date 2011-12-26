@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public delegate void RequestErrorHandler(string data, string error);
+
 internal class Playtomic_Request
 {
 	public static Dictionary<String, Playtomic_Response> Requests = new Dictionary<String, Playtomic_Response>();
@@ -17,7 +19,7 @@ internal class Playtomic_Request
 		URL = URLStub + "v3/api.aspx?" + URLTail;
 	}
 	
-	public static IEnumerator SendStatistics(string data)
+	public static IEnumerator SendStatistics(string data, RequestErrorHandler errorHandler)
 	{
 		//Debug.Log("Request created");
 		WWWForm post = new WWWForm();
@@ -32,6 +34,11 @@ internal class Playtomic_Request
 		
 		WWW www = new WWW(turl, post);
 		yield return www;
+		
+		if (www.error != null && errorHandler != null)
+		{
+			errorHandler(data, www.error);
+		}
 		
 		Debug.Log(www.text);
 	}
